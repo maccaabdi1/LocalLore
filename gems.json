@@ -1,0 +1,57 @@
+[
+  {
+    "_id": "1",
+    "name": "The Secret Café",
+    "description": "A cozy underground coffee shop with live poetry nights.",
+    "address": "123 Side St, Rochester, NY",
+    "coordinates": { "lat": 43.161, "lng": -77.610 },
+    "category": "Café",
+    "photoUrl": "https://example.com/secret-cafe.jpg",
+    "upvotes": 15,
+    "userId": "1"
+  },
+  {
+    "_id": "2",
+    "name": "Vault Arcade",
+    "description": "Retro arcade hidden in a basement with neon lights and old-school games.",
+    "address": "456 Arcade Ave, Rochester, NY",
+    "coordinates": { "lat": 43.158, "lng": -77.612 },
+    "category": "Entertainment",
+    "photoUrl": "https://example.com/vault-arcade.jpg",
+    "upvotes": 22,
+    "userId": "2"
+  },
+  {
+    "_id": "3",
+    "name": "Bastion Books",
+    "description": "Independent bookstore tucked inside an old castle-like building.",
+    "address": "789 Story Ln, Rochester, NY",
+    "coordinates": { "lat": 43.159, "lng": -77.608 },
+    "category": "Bookstore",
+    "photoUrl": "https://example.com/bastion-books.jpg",
+    "upvotes": 8,
+    "userId": "1"
+  },
+  {
+    "_id": "4",
+    "name": "Hidden Haven Park",
+    "description": "Small park with medieval-style statues and quiet walking trails.",
+    "address": "321 Meadow Rd, Rochester, NY",
+    "coordinates": { "lat": 43.162, "lng": -77.615 },
+    "category": "Park",
+    "photoUrl": "https://example.com/hidden-haven-park.jpg",
+    "upvotes": 5,
+    "userId": "3"
+  },
+  {
+    "_id": "5",
+    "name": "The Keep Tavern",
+    "description": "A medieval-themed tavern serving craft ales and live lute music.",
+    "address": "654 Ale St, Rochester, NY",
+    "coordinates": { "lat": 43.160, "lng": -77.611 },
+    "category": "Restaurant",
+    "photoUrl": "https://example.com/keep-tavern.jpg",
+    "upvotes": 30,
+    "userId": "2"
+  }
+]
