@@ -1,6 +1,6 @@
 [
   {
-    "_id": "1",
+    "_id": { "$oid": "650b1a1f7fdd9b2d0b0c1a21" },
     "name": "The Secret Café",
     "description": "A cozy underground coffee shop with live poetry nights.",
     "address": "123 Side St, Rochester, NY",
@@ -8,10 +8,10 @@
     "category": "Café",
     "photoUrl": "https://example.com/secret-cafe.jpg",
     "upvotes": 15,
-    "userId": "1"
+    "userId": { "$oid": "650b1a1f7fdd9b2d0b0c1b01" }
   },
   {
-    "_id": "2",
+    "_id": { "$oid": "650b1a1f7fdd9b2d0b0c1a22" },
     "name": "Vault Arcade",
     "description": "Retro arcade hidden in a basement with neon lights and old-school games.",
     "address": "456 Arcade Ave, Rochester, NY",
@@ -19,10 +19,10 @@
     "category": "Entertainment",
     "photoUrl": "https://example.com/vault-arcade.jpg",
     "upvotes": 22,
-    "userId": "2"
+    "userId": { "$oid": "650b1a1f7fdd9b2d0b0c1b02" }
   },
   {
-    "_id": "3",
+    "_id": { "$oid": "650b1a1f7fdd9b2d0b0c1a23" },
     "name": "Bastion Books",
     "description": "Independent bookstore tucked inside an old castle-like building.",
     "address": "789 Story Ln, Rochester, NY",
@@ -30,10 +30,10 @@
     "category": "Bookstore",
     "photoUrl": "https://example.com/bastion-books.jpg",
     "upvotes": 8,
-    "userId": "1"
+    "userId": { "$oid": "650b1a1f7fdd9b2d0b0c1b01" }
   },
   {
-    "_id": "4",
+    "_id": { "$oid": "650b1a1f7fdd9b2d0b0c1a24" },
     "name": "Hidden Haven Park",
     "description": "Small park with medieval-style statues and quiet walking trails.",
     "address": "321 Meadow Rd, Rochester, NY",
@@ -41,10 +41,10 @@
     "category": "Park",
     "photoUrl": "https://example.com/hidden-haven-park.jpg",
     "upvotes": 5,
-    "userId": "3"
+    "userId": { "$oid": "650b1a1f7fdd9b2d0b0c1b03" }
   },
   {
-    "_id": "5",
+    "_id": { "$oid": "650b1a1f7fdd9b2d0b0c1a25" },
     "name": "The Keep Tavern",
     "description": "A medieval-themed tavern serving craft ales and live lute music.",
     "address": "654 Ale St, Rochester, NY",
@@ -52,6 +52,6 @@
     "category": "Restaurant",
     "photoUrl": "https://example.com/keep-tavern.jpg",
     "upvotes": 30,
-    "userId": "2"
+    "userId": { "$oid": "650b1a1f7fdd9b2d0b0c1b02" }
   }
 ]
