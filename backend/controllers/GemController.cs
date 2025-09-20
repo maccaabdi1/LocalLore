@@ -36,7 +36,7 @@ namespace Backend.Controllers
             }).ToList();
             return Ok(gemsDtos);
         }
-       [HttpGet("{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Gem>> GetGemById(string id)
         {
             if (!ObjectId.TryParse(id, out var objectId))
@@ -44,7 +44,7 @@ namespace Backend.Controllers
                 return BadRequest(new { message = "Invalid ID format." });
             }
 
-            var gem = await _mongoDBService.GetUser(objectId);
+            var gem = await _mongoDBService.GetGem(objectId);
             if (gem == null)
             {
                 return NotFound(new { message = "gem not found." });
@@ -69,6 +69,25 @@ namespace Backend.Controllers
 
             await _mongoDBService.CreateGem(gem);
             return CreatedAtAction(nameof(GetGemById), new { id = gem.Id }, gem);
+        }
+        [HttpPatch("{id}/upvote")]
+        public async Task<ActionResult> UpvoteGem(string id)
+        {
+            if (!ObjectId.TryParse(id, out var objectId))
+            {
+                return BadRequest(new { message = "Invalid ID format." });
+            }
+
+            var gem = await _mongoDBService.GetGem(objectId);
+            if (gem == null)
+            {
+                return NotFound(new { message = "Gem not found." });
+            }
+
+            gem.Upvotes += 1;
+            await _mongoDBService.UpdateGem(gem);
+
+            return NoContent();
         }
         
         

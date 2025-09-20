@@ -41,6 +41,8 @@ public class MongoDBService
         await _gemCollection.Find(new BsonDocument()).ToListAsync();
     public async Task CreateGem(Gem gem) =>
         await _gemCollection.InsertOneAsync(gem);
-    public async Task<Gem?> GetGem(int id) =>
+    public async Task<Gem?> GetGem(ObjectId id) =>
         await _gemCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
+    public async Task<Gem> UpdateGem(Gem gem) =>
+        await _gemCollection.FindOneAndReplaceAsync(x => x.Id == gem.Id, gem);
 }
