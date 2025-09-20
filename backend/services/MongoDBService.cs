@@ -21,13 +21,16 @@ public class MongoDBService
             mongoDBSettings.Value.CollectionName);
     }
 
-    public async Task<List<User>> GetAsync() =>
+    public async Task<List<User>> GetUsers() =>
         await _userCollection.Find(new BsonDocument()).ToListAsync();
 
-    public async Task CreateAsync(User user) =>
+    public async Task CreateUser(User user) =>
         await _userCollection.InsertOneAsync(user);
 
     public async Task<User?> GetAsync(int id) =>
         await _userCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
 
-}
+    public async Task<User> GetEmail(string email) =>
+        await _userCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
+
+}   

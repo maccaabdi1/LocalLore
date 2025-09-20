@@ -22,7 +22,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetUsers()
         {
-            var users = await _mongoDBService.GetAsync();
+            var users = await _mongoDBService.GetUsers();
             var userDtos = users.Select(u => new UserDto
             {
                 Id = u.Id.ToString(),
@@ -37,7 +37,29 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(User newUser)
         {
-            await _mongoDBService.CreateAsync(newUser);
+            await _mongoDBService.CreateUser(newUser);
+            return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, newUser);
+        }
+        public class ResigierRequest
+        {
+            public string Email { get; set; }
+        }
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Register([FromBody] ResigierRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                return BadRequest("Email is required");
+
+            var existingUser = await _mongoDBService.GetEmail(request.Email);
+            if (existingUser != null)
+                return Conflict("Email already in use");
+            var newUser = new User
+            {
+                Email = request.Email,
+                Role = "user"
+                
+            };
+            await _mongoDBService.CreateUser(newUser);
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, newUser);
         }
 
