@@ -84,7 +84,7 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
-            var user = await _mongoDBService.GetAsync(id);
+            var user = await _mongoDBService.GetUser(id);
             if (user == null)
             {
                 return NotFound();

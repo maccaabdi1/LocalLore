@@ -17,7 +17,7 @@ namespace Backend.Controllers
             _mongoDBService = mongoDBService;
         }
         [HttpGet]
-          public async Task<ActionResult<List<Gem>>> GetGems()
+        public async Task<ActionResult<List<Gem>>> GetGems()
         {
             var gems = await _mongoDBService.GetGems();
             var gemsDtos = gems.Select(g => new GemDto
@@ -35,6 +35,35 @@ namespace Backend.Controllers
             }).ToList();
             return Ok(gemsDtos);
         }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Gem>> GetGemById(int id)
+        {
+            var gem = await _mongoDBService.GetGem(id);
+            if (gem == null)
+            {
+                return NotFound();
+            }
+            return gem;
+        }
+        [HttpPost]
+        public async Task<ActionResult<Gem>> CreateUser([FromBody] GemCreateDto newGem)
+        {
+            var gem = new Gem
+            {
+                Name = newGem.Name,
+                Description = newGem.Description,
+                Address = newGem.Address,
+                Coordinates = new Coordinates { Lat = newGem.Coordinates.Lat, Lng = newGem.Coordinates.Lng },
+                Category = newGem.Category,
+                PhotoURL = newGem.PhotoUrl,
+                Upvotes = newGem.Upvotes,
+                UserId = MongoDB.Bson.ObjectId.Parse(newGem.UserId)
+            };
+
+            await _mongoDBService.CreateGem(gem);
+            return CreatedAtAction(nameof(GetGemById), new { id = gem.Id }, gem);
+        }
+        
 
 
          

@@ -31,7 +31,7 @@ public class MongoDBService
     public async Task CreateUser(User user) =>
         await _userCollection.InsertOneAsync(user);
 
-    public async Task<User?> GetAsync(int id) =>
+    public async Task<User?> GetUser(int id) =>
         await _userCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
 
     public async Task<User> GetEmail(string email) =>
@@ -39,4 +39,8 @@ public class MongoDBService
     ///ALL GEM STUFF
     public async Task<List<Gem>> GetGems() =>
         await _gemCollection.Find(new BsonDocument()).ToListAsync();
+    public async Task CreateGem(Gem gem) =>
+        await _gemCollection.InsertOneAsync(gem);
+    public async Task<Gem?> GetGem(int id) =>
+        await _gemCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
 }   
