@@ -2,6 +2,7 @@
 using System.Diagnostics.Eventing.Reader;
 using LocalLore.Service;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 namespace Backend.Controllers
 
 {
@@ -35,15 +36,21 @@ namespace Backend.Controllers
             }).ToList();
             return Ok(gemsDtos);
         }
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Gem>> GetGemById(int id)
+       [HttpGet("{id}")]
+        public async Task<ActionResult<Gem>> GetGemById(string id)
         {
-            var gem = await _mongoDBService.GetGem(id);
+            if (!ObjectId.TryParse(id, out var objectId))
+            {
+                return BadRequest(new { message = "Invalid ID format." });
+            }
+
+            var gem = await _mongoDBService.GetUser(objectId);
             if (gem == null)
             {
-                return NotFound();
+                return NotFound(new { message = "gem not found." });
             }
-            return gem;
+
+            return Ok(gem);
         }
         [HttpPost]
         public async Task<ActionResult<Gem>> CreateUser([FromBody] GemCreateDto newGem)
@@ -63,6 +70,7 @@ namespace Backend.Controllers
             await _mongoDBService.CreateGem(gem);
             return CreatedAtAction(nameof(GetGemById), new { id = gem.Id }, gem);
         }
+        
         
 
 

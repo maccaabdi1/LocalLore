@@ -31,8 +31,8 @@ public class MongoDBService
     public async Task CreateUser(User user) =>
         await _userCollection.InsertOneAsync(user);
 
-    public async Task<User?> GetUser(int id) =>
-        await _userCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
+    public async Task<User?> GetUser(ObjectId id) =>
+        await _userCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     public async Task<User> GetEmail(string email) =>
         await _userCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
@@ -43,4 +43,4 @@ public class MongoDBService
         await _gemCollection.InsertOneAsync(gem);
     public async Task<Gem?> GetGem(int id) =>
         await _gemCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
-}   
+}
