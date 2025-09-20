@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Backend.Controllers
 
 {
-    [Route("api/users")]
+    [Route("/users")]
     [ApiController]
 
     public class UserController : ControllerBase
@@ -42,7 +42,8 @@ namespace Backend.Controllers
         }
         public class ResigierRequest
         {
-            public string Email { get; set; }
+            public string Email { get; set; } = null!;
+            public string Name { get; set; } = null!;
         }
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody] ResigierRequest request)
@@ -55,6 +56,7 @@ namespace Backend.Controllers
                 return Conflict("Email already in use");
             var newUser = new User
             {
+                Name = request.Name,
                 Email = request.Email,
                 Role = "user"
                 
