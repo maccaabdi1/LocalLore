@@ -24,7 +24,7 @@ public class MongoDBService
         _gemCollection = mongoDatabase.GetCollection<Gem>(
             mongoDBSettings.Value.GemCollectionName);
     }
-
+    ///ALL USER STUFF
     public async Task<List<User>> GetUsers() =>
         await _userCollection.Find(new BsonDocument()).ToListAsync();
 
@@ -36,5 +36,7 @@ public class MongoDBService
 
     public async Task<User> GetEmail(string email) =>
         await _userCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
-
+    ///ALL GEM STUFF
+    public async Task<List<Gem>> GetGems() =>
+        await _gemCollection.Find(new BsonDocument()).ToListAsync();
 }   
