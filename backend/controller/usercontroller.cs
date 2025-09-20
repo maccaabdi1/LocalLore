@@ -16,12 +16,29 @@ namespace Backend.Controllers
 
                 Id = 1,
                 Email = "poop1@gmail.com"
+            },
+            new User
+            {
+                Id = 2,
+                Email = "yummmy2@gmail.com"
             }
         };
         [HttpGet]
         public ActionResult<List<EventBookmark>> GetUsers()
         {
-            return Ok(users);}
+            return Ok(users);
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<User> GetUserById(int id)
+        {
+            var user = users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
     }
 }
 

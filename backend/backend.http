@@ -8,6 +8,10 @@ Accept: application/json
 GET {{rootURL}}/api/users
 Accept: application/json
 
+###
+GET GET {{rootURL}}/api/users/1
+Accept: application/json
+
 
 
 
