@@ -45,6 +45,11 @@ namespace Backend.Controllers
             public string Email { get; set; } = null!;
             public string Name { get; set; } = null!;
         }
+        public class LoginRequest
+        {
+            public string Email { get; set; } = null!;
+            
+        }
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody] ResigierRequest request)
         {
@@ -64,7 +69,18 @@ namespace Backend.Controllers
             await _mongoDBService.CreateUser(newUser);
             return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, newUser);
         }
+        [HttpPost("login")]
+        public async Task<ActionResult<User>> Login([FromBody] LoginRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                return BadRequest("Email is required");
 
+            var user = await _mongoDBService.GetEmail(request.Email);
+            if (user == null)
+                return NotFound("User not found");
+            return Ok(new { message = "Log in successful", user });
+        }
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
