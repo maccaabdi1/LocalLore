@@ -8,6 +8,7 @@ namespace LocalLore.Service;
 public class MongoDBService
 {
     private readonly IMongoCollection<User> _userCollection;
+    private readonly IMongoCollection<Gem> _gemCollection;
 
     public MongoDBService(IOptions<MongoDBSettings> mongoDBSettings)
     {
@@ -18,7 +19,10 @@ public class MongoDBService
             mongoDBSettings.Value.DatabaseName);
 
         _userCollection = mongoDatabase.GetCollection<User>(
-            mongoDBSettings.Value.CollectionName);
+            mongoDBSettings.Value.UserCollectionName);
+
+        _gemCollection = mongoDatabase.GetCollection<Gem>(
+            mongoDBSettings.Value.GemCollectionName);
     }
 
     public async Task<List<User>> GetUsers() =>
