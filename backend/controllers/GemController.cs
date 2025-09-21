@@ -30,8 +30,8 @@ namespace Backend.Controllers
                 Category = g.Category,
                 PhotoUrl = g.PhotoURL,
                 Upvotes = g.Upvotes,
-                UserId = g.UserId.ToString()
-
+                UserId = g.UserId.ToString(),
+                Coordinates = g.Coordinates
 
             }).ToList();
             return Ok(gemsDtos);
