@@ -53,7 +53,7 @@ namespace Backend.Controllers
             return Ok(gem);
         }
         [HttpPost]
-        public async Task<ActionResult<Gem>> CreateUser([FromBody] GemCreateDto newGem)
+        public async Task<ActionResult<Gem>> CreateGem([FromBody] GemCreateDto newGem)
         {
             var gem = new Gem
             {
@@ -106,6 +106,41 @@ namespace Backend.Controllers
             gem.Upvotes -= 1;
             await _mongoDBService.UpdateGem(gem);
 
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteGem(string id, [FromHeader(Name = "User-Id")] string userId)
+        {
+            if (!ObjectId.TryParse(id, out var gemObjectId))
+            {
+                return BadRequest(new { message = "Invalid gem ID format." });
+            }
+
+            if (!ObjectId.TryParse(userId, out var userObjectId))
+            {
+                return BadRequest(new { message = "Invalid user ID format." });
+            }
+
+            // Check if user exists and is admin
+            var user = await _mongoDBService.GetUser(userObjectId);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "User not found." });
+            }
+
+            if (user.Role != "admin")
+            {
+                return StatusCode(403, new { message = "Only administrators can delete gems." });
+            }
+
+            var gem = await _mongoDBService.GetGem(gemObjectId);
+            if (gem == null)
+            {
+                return NotFound(new { message = "Gem not found." });
+            }
+
+            await _mongoDBService.DeleteGem(gemObjectId);
             return NoContent();
         }
         

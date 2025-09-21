@@ -45,4 +45,6 @@ public class MongoDBService
         await _gemCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
     public async Task<Gem> UpdateGem(Gem gem) =>
         await _gemCollection.FindOneAndReplaceAsync(x => x.Id == gem.Id, gem);
+    public async Task DeleteGem(ObjectId id) =>
+        await _gemCollection.DeleteOneAsync(x => x.Id == id);
 }
