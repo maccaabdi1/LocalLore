@@ -5,11 +5,6 @@ import Landing from './pages/Landing'
 function App() {
   return (
     <div>
-      <nav>
-        <Link to="/dashboard">Dashboard</Link> | 
-        <Link to="/">Landing</Link>
-      </nav>
-
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/" element={<Landing />} />

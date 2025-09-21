@@ -44,45 +44,73 @@ export default function SignUpCard({ onSwitch }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ 
+      background: 'linear-gradient(135deg, #ffedd4 0%, #77966d 100%)' 
+    }}>
+      <Card className="w-full max-w-md p-8 shadow-2xl">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-2" style={{ color: '#544343' }}>
+            Join LocalLore
+          </h2>
+          <p className="text-lg" style={{ color: '#626d58' }}>
+            Discover amazing places in your area
+          </p>
+        </div>
 
         {error && (
-          <div className="text-red-500 mb-4 text-center">{error}</div>
+          <div className="error-message mb-6 text-center">
+            {error}
+          </div>
         )}
 
-        <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-        <InputText
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full mb-4"
-          placeholder="Your name"
-        />
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-semibold mb-3">Full Name</label>
+            <div className="relative w-full">
+              <i className="pi pi-user absolute left-4 top-1/2 transform -translate-y-1/2 text-base z-10 pointer-events-none" style={{ color: '#626d58' }} />
+              <InputText
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full pl-11"
+                placeholder="Enter your full name"
+              />
+            </div>
+          </div>
 
-        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-        <span className="p-input-icon-left w-full mb-4 block">
-          <i className="pi pi-envelope" />
-          <InputText
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full"
-            placeholder="you@example.com"
+          <div>
+            <label className="block text-sm font-semibold mb-3">Email Address</label>
+            <div className="relative w-full">
+              <i className="pi pi-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-base z-10 pointer-events-none" style={{ color: '#626d58' }} />
+              <InputText
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-11"
+                placeholder="Enter your email"
+              />
+            </div>
+          </div>
+
+          <Button
+            label={loading ? 'Creating Account...' : 'Sign Up'}
+            className="w-full mt-6"
+            onClick={handleSignUp}
+            disabled={loading}
+            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-user-plus"}
+            iconPos="left"
           />
-        </span>
+        </div>
 
-        <Button
-          label={loading ? 'Signing Up...' : 'Sign Up'}
-          className="w-full mt-2 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-          onClick={handleSignUp}
-          disabled={loading}
-        />
-
-        <div className="text-center mt-4">
-          <span className="text-gray-600">Already have an account? </span>
-          <button onClick={onSwitch} className="text-indigo-600 font-semibold">
-            Sign in
-          </button>
+        <div className="mt-8 text-center">
+          <p style={{ color: '#626d58' }}>
+            Already have an account?{' '}
+            <button 
+              onClick={onSwitch} 
+              className="font-semibold hover:underline transition-all duration-200"
+              style={{ color: '#77966d' }}
+            >
+              Sign in here
+            </button>
+          </p>
         </div>
       </Card>
     </div>

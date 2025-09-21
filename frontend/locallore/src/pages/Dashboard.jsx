@@ -37,24 +37,31 @@ async function getAddressFromLatLng(lat, lng) {
   return data.display_name || "";
 }
 
+// Custom SVG icons that match our color scheme
+const createCustomMarkerIcon = (color = '#77966d', size = 38) => {
+  const svg = `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="${color}" stroke="#ffedd4" stroke-width="2"/>
+      <circle cx="12" cy="9" r="2.5" fill="#ffedd4"/>
+    </svg>
+  `;
+  const encodedSvg = encodeURIComponent(svg);
+  return new Icon({
+    iconUrl: `data:image/svg+xml,${encodedSvg}`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size],
+    popupAnchor: [0, -size + 10],
+  });
+};
 
-// create custom icon
-const customIcon = new Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/447/447031.png",
-  iconSize: [38, 38],
-});
+// create custom icon (sage green)
+const customIcon = createCustomMarkerIcon('#77966d');
 
-// create custom icon for unsaved markers (red color)
-const unsavedIcon = new Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [38, 38],
-});
+// create custom icon for unsaved markers (burgundy)
+const unsavedIcon = createCustomMarkerIcon('#56282d');
 
-// create custom icon for favorited markers (star icon)
-const favoriteIcon = new Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/1828/1828884.png",
-  iconSize: [38, 38],
-});
+// create custom icon for favorited markers (golden color)
+const favoriteIcon = createCustomMarkerIcon('#544343');
 
 // custom cluster icon
 const createClusterCustomIcon = (cluster) =>
@@ -179,25 +186,45 @@ export default function Dashboard() {
     }
   };
 
-  const handleUpvoteGem = (gemId) => {
-    if (upvotedMarkers.has(gemId)) {
-      // Remove upvote
-      setGemsUpvotes(prev => ({
-        ...prev,
-        [gemId]: Math.max(0, prev[gemId] - 1)
-      }));
-      setUpvotedMarkers(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(gemId);
-        return newSet;
-      });
-    } else {
-      // Add upvote
-      setGemsUpvotes(prev => ({
-        ...prev,
-        [gemId]: prev[gemId] + 1
-      }));
-      setUpvotedMarkers(prev => new Set([...prev, gemId]));
+  const handleUpvoteGem = async (gemId) => {
+    try {
+      if (upvotedMarkers.has(gemId)) {
+        // Remove upvote via API
+        const response = await fetch(`http://localhost:5266/gems/${gemId}/downvote`, {
+          method: 'PATCH',
+        });
+        
+        if (response.ok) {
+          setGemsUpvotes(prev => ({
+            ...prev,
+            [gemId]: Math.max(0, prev[gemId] - 1)
+          }));
+          setUpvotedMarkers(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(gemId);
+            return newSet;
+          });
+        } else {
+          console.error('Failed to downvote gem');
+        }
+      } else {
+        // Add upvote via API
+        const response = await fetch(`http://localhost:5266/gems/${gemId}/upvote`, {
+          method: 'PATCH',
+        });
+        
+        if (response.ok) {
+          setGemsUpvotes(prev => ({
+            ...prev,
+            [gemId]: prev[gemId] + 1
+          }));
+          setUpvotedMarkers(prev => new Set([...prev, gemId]));
+        } else {
+          console.error('Failed to upvote gem');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating upvote:', error);
     }
   };
 
@@ -208,14 +235,43 @@ export default function Dashboard() {
     }));
   };
 
-  const handleDeleteGem = (gemId) => {
-    setDeletedGems(prev => new Set([...prev, gemId]));
-    // Also remove from upvoted markers if it was upvoted
-    setUpvotedMarkers(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(gemId);
-      return newSet;
-    });
+  const handleDeleteGem = async (gemId) => {
+    try {
+      // Get current user from localStorage
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // if (!currentUser.id) {
+      //   alert('You must be logged in to delete gems');
+      //   return;
+      // }
+
+      const response = await fetch(`http://localhost:5266/gems/${gemId}`, {
+        method: 'DELETE',
+        headers: {
+          'User-Id': currentUser.id,
+        },
+      });
+
+      if (response.ok) {
+        setDeletedGems(prev => new Set([...prev, gemId]));
+        // Also remove from upvoted markers if it was upvoted
+        setUpvotedMarkers(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(gemId);
+          return newSet;
+        });
+      } else if (response.status === 403) {
+        alert('Only administrators can delete gems');
+      } else if (response.status === 401) {
+        alert('Invalid user credentials');
+      } else {
+        console.error('Failed to delete gem');
+        alert('Failed to delete gem');
+      }
+    } catch (error) {
+      console.error('Error deleting gem:', error);
+      alert('Error deleting gem');
+    }
   };
 
   const handleFavoriteUser = (markerId) => {
@@ -259,12 +315,77 @@ export default function Dashboard() {
   };
 
 
-  const handleSaveMarker = (id, name, description, category) => {
-    setUserMarkers((current) =>
-      current.map((m) =>
-        m.id === id ? { ...m, name, description, category, saved: true } : m
-      )
-    );
+  const handleSaveMarker = async (id, name, description, category) => {
+    try {
+      // Find the marker being saved
+      const marker = userMarkers.find(m => m.id === id);
+      if (!marker) return;
+
+      // Create gem via API
+      const gemData = {
+        name,
+        description,
+        address: marker.address || "Unknown address",
+        coordinates: {
+          lat: marker.position.lat,
+          lng: marker.position.lng
+        },
+        category,
+        photoUrl: "https://via.placeholder.com/300x200", // Default placeholder
+        upvotes: 0,
+        userId: "000000000000000000000000" // Default user ID for now
+      };
+
+      const response = await fetch('http://localhost:5266/gems', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(gemData),
+      });
+
+      if (response.ok) {
+        const newGem = await response.json();
+        
+        // Remove from user markers and add to gems
+        setUserMarkers(current => current.filter(m => m.id !== id));
+        
+        // Add to gems state
+        setGems(prev => [...prev, {
+          id: newGem.id,
+          name: newGem.name,
+          description: newGem.description,
+          address: newGem.address,
+          coordinates: newGem.coordinates,
+          category: newGem.category,
+          upvotes: newGem.upvotes,
+          userId: newGem.userId
+        }]);
+        
+        // Initialize upvotes and favorites for the new gem
+        setGemsUpvotes(prev => ({ ...prev, [newGem.id]: newGem.upvotes }));
+        setGemsFavorites(prev => ({ ...prev, [newGem.id]: false }));
+        
+      } else {
+        console.error('Failed to create gem');
+        alert('Failed to create gem');
+        // Still update local state as fallback
+        setUserMarkers((current) =>
+          current.map((m) =>
+            m.id === id ? { ...m, name, description, category, saved: true } : m
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error creating gem:', error);
+      alert('Error creating gem');
+      // Still update local state as fallback
+      setUserMarkers((current) =>
+        current.map((m) =>
+          m.id === id ? { ...m, name, description, category, saved: true } : m
+        )
+      );
+    }
   };
 
   const handleDragEnd = (id, newLatLng) => {
@@ -276,34 +397,49 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-orange-100 text-gray-800">
-      <h1 className="text-3xl font-bold">LocalLore Dashboard</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4" style={{ 
+      background: 'linear-gradient(135deg, #ffedd4 0%, #77966d 100%)' 
+    }}>
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-2" style={{ color: '#544343' }}>
+          LocalLore Dashboard
+        </h1>
+        <p className="text-lg" style={{ color: '#626d58' }}>
+          Double-click on the map to add a new gem (Admin login required only for deleting)
+        </p>
+      </div>
       
       {loading && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 p-4 rounded-lg" style={{ 
+          background: 'rgba(255, 237, 212, 0.8)', 
+          color: '#626d58' 
+        }}>
           <i className="pi pi-spin pi-spinner"></i>
           <span>Loading gems from database...</span>
         </div>
       )}
       
       {/* Filter Tags */}
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center p-4 rounded-2xl" style={{ 
+        background: 'rgba(255, 237, 212, 0.8)' 
+      }}>
         {FILTER_CATEGORIES.map((category) => (
           <Tag
             key={category.value}
             value={category.label}
             icon={category.icon}
-            className={`cursor-pointer transition-all ${
-              activeFilters.includes(category.value)
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`filter-button cursor-pointer transition-all ${
+              activeFilters.includes(category.value) ? 'active' : ''
             }`}
             onClick={() => toggleFilter(category.value)}
           />
         ))}
       </div>
 
-      <div className="w-11/12 h-[85vh] rounded-3xl overflow-hidden shadow-xl">
+      <div className="w-11/12 h-[85vh] rounded-3xl overflow-hidden shadow-2xl" style={{ 
+        border: '3px solid #77966d',
+        boxShadow: '0 25px 50px rgba(84, 67, 67, 0.2)' 
+      }}>
         <MapContainer
           center={[43.1566, -77.6088]}
           zoom={13}
@@ -333,13 +469,17 @@ export default function Dashboard() {
                     icon={marker.isFavorite ? favoriteIcon : customIcon}
                   >
                     <Popup className="big-popup">
-                      <div>
-                        <h3 className="font-semibold">{marker.name}</h3>
-                        <p className="text-sm">{marker.description}</p>
-                        <p className="text-xs text-gray-500 mt-2">
+                      <div style={{ color: '#544343' }}>
+                        <h3 className="font-semibold text-lg mb-2" style={{ color: '#544343' }}>
+                          {marker.name}
+                        </h3>
+                        <p className="text-sm mb-2" style={{ color: '#626d58' }}>
+                          {marker.description}
+                        </p>
+                        <p className="text-xs mb-1" style={{ color: '#626d58', opacity: 0.8 }}>
                           {marker.address}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs mb-3" style={{ color: '#626d58', opacity: 0.6 }}>
                           {marker.geocode[0].toFixed(5)}, {marker.geocode[1].toFixed(5)}
                         </p>
                         <div className="flex items-center justify-between mt-3">
@@ -347,12 +487,12 @@ export default function Dashboard() {
                             <Button
                               icon={upvotedMarkers.has(gem.id) ? "pi pi-thumbs-up-fill" : "pi pi-thumbs-up"}
                               label={`${marker.upvotes} upvotes`}
-                              className={`p-button-sm ${upvotedMarkers.has(gem.id) ? 'p-button-success' : 'p-button-outlined'}`}
+                              className={`p-button-sm ${upvotedMarkers.has(gem.id) ? '' : 'p-button-outlined'}`}
                               onClick={() => handleUpvoteGem(gem.id)}
                             />
                             <Button
                               icon={marker.isFavorite ? "pi pi-star-fill" : "pi pi-star"}
-                              className={`p-button-sm ${marker.isFavorite ? 'p-button-warning' : 'p-button-outlined'}`}
+                              className={`p-button-sm ${marker.isFavorite ? '' : 'p-button-outlined'}`}
                               onClick={() => handleFavoriteGem(gem.id)}
                               tooltip={marker.isFavorite ? "Remove from favorites" : "Add to favorites"}
                             />
@@ -398,13 +538,17 @@ export default function Dashboard() {
                   >
                     <Popup className="big-popup">
                       {marker.saved ? (
-                        <div>
-                          <h3 className="font-semibold">{marker.name}</h3>
-                          <p className="text-sm">{marker.description}</p>
-                          <p className="text-xs text-gray-500 mt-2">
+                        <div style={{ color: '#544343' }}>
+                          <h3 className="font-semibold text-lg mb-2" style={{ color: '#544343' }}>
+                            {marker.name}
+                          </h3>
+                          <p className="text-sm mb-2" style={{ color: '#626d58' }}>
+                            {marker.description}
+                          </p>
+                          <p className="text-xs mb-1" style={{ color: '#626d58', opacity: 0.8 }}>
                             {marker.address || "No address found"}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs mb-3" style={{ color: '#626d58', opacity: 0.6 }}>
                             {marker.position.lat.toFixed(5)}, {marker.position.lng.toFixed(5)}
                           </p>
                           <div className="flex items-center justify-between mt-3">
@@ -412,12 +556,12 @@ export default function Dashboard() {
                               <Button
                                 icon={upvotedMarkers.has(marker.id) ? "pi pi-thumbs-up-fill" : "pi pi-thumbs-up"}
                                 label={`${marker.upvotes || 0} upvotes`}
-                                className={`p-button-sm ${upvotedMarkers.has(marker.id) ? 'p-button-success' : 'p-button-outlined'}`}
+                                className={`p-button-sm ${upvotedMarkers.has(marker.id) ? '' : 'p-button-outlined'}`}
                                 onClick={() => handleUpvoteUser(marker.id)}
                               />
                               <Button
                                 icon={marker.isFavorite ? "pi pi-star-fill" : "pi pi-star"}
-                                className={`p-button-sm ${marker.isFavorite ? 'p-button-warning' : 'p-button-outlined'}`}
+                                className={`p-button-sm ${marker.isFavorite ? '' : 'p-button-outlined'}`}
                                 onClick={() => handleFavoriteUser(marker.id)}
                                 tooltip={marker.isFavorite ? "Remove from favorites" : "Add to favorites"}
                               />
@@ -447,16 +591,18 @@ export default function Dashboard() {
       <style>
         {`
           .cluster-icon {
-            background-color: #333;
+            background: linear-gradient(135deg, #77966d 0%, #626d58 100%);
             height: 2em;
             width: 2em;
-            color: #fff;
+            color: #ffedd4;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 9999px; /* fully rounded */
+            border-radius: 9999px;
             font-size: 1.2rem;
-            box-shadow: 0 0 0 5px #fff;
+            font-weight: 700;
+            box-shadow: 0 0 0 3px #ffedd4, 0 4px 15px rgba(119, 150, 109, 0.3);
+            border: 2px solid #77966d;
           }
         `}
       </style>
