@@ -24,14 +24,25 @@ public class MongoDBService
         _gemCollection = mongoDatabase.GetCollection<Gem>(
             mongoDBSettings.Value.GemCollectionName);
     }
-
-    public async Task<List<User>> GetAsync() =>
+    ///ALL USER STUFF
+    public async Task<List<User>> GetUsers() =>
         await _userCollection.Find(new BsonDocument()).ToListAsync();
 
-    public async Task CreateAsync(User user) =>
+    public async Task CreateUser(User user) =>
         await _userCollection.InsertOneAsync(user);
 
-    public async Task<User?> GetAsync(int id) =>
-        await _userCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
+    public async Task<User?> GetUser(ObjectId id) =>
+        await _userCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
+    public async Task<User> GetEmail(string email) =>
+        await _userCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
+    ///ALL GEM STUFF
+    public async Task<List<Gem>> GetGems() =>
+        await _gemCollection.Find(new BsonDocument()).ToListAsync();
+    public async Task CreateGem(Gem gem) =>
+        await _gemCollection.InsertOneAsync(gem);
+    public async Task<Gem?> GetGem(ObjectId id) =>
+        await _gemCollection.Find(x => x.Id == new ObjectId(id.ToString())).FirstOrDefaultAsync();
+    public async Task<Gem> UpdateGem(Gem gem) =>
+        await _gemCollection.FindOneAndReplaceAsync(x => x.Id == gem.Id, gem);
 }
