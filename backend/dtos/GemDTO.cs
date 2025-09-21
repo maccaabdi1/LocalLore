@@ -8,4 +8,5 @@ public class GemDto
     public string PhotoUrl { get; set; } = null!;
     public int Upvotes { get; set; }
     public string UserId { get; set; } = null!;
+    public Coordinates Coordinates { get; set; } = new Coordinates();
 }

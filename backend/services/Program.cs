@@ -7,31 +7,33 @@ builder.Services.Configure<MongoDBSettings>(
     builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<MongoDBService>();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddControllers();
 
-builder.Services.AddControllers(); // Add this line to register the controllers
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapControllers();
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
 
+// Enable CORS before controllers
+app.UseCors("AllowFrontend");
 
+app.UseAuthorization();
 
-app.MapGet("/locallore", () =>
-{
-
-})
-.WithName("GetUsers");
-
-app.MapControllers(); // Add this line to map the controller routes
+app.MapControllers();
 
 app.Run();
-
-
