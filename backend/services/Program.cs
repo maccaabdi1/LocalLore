@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 🔑 Order matters
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
