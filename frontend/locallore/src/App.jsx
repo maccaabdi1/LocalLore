@@ -1,23 +1,21 @@
-import React from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { Routes, Route, Link } from 'react-router-dom'
+import Dashboard from './pages/Dashboard'
+import Landing from './pages/Landing'  
 
 function App() {
   return (
-    <div style={{ height: "100vh", width: "100%" }}>
-      <MapContainer
-        center={[48.8566, 2.3522]} // Paris
-        zoom={13}
-        style={{ height: "100%", width: "100%" }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-      </MapContainer>
-  
+    <div>
+      <nav>
+        <Link to="/dashboard">Dashboard</Link> | 
+        <Link to="/">Landing</Link>
+      </nav>
+
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Landing />} />
+      </Routes>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
