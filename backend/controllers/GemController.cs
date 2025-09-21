@@ -89,6 +89,25 @@ namespace Backend.Controllers
 
             return NoContent();
         }
+        [HttpPatch("{id}/downvote")]
+        public async Task<ActionResult> DownvoteGem(string id)
+        {
+            if (!ObjectId.TryParse(id, out var objectId))
+            {
+                return BadRequest(new { message = "Invalid ID format." });
+            }
+
+            var gem = await _mongoDBService.GetGem(objectId);
+            if (gem == null)
+            {
+                return NotFound(new { message = "Gem not found." });
+            }
+
+            gem.Upvotes -= 1;
+            await _mongoDBService.UpdateGem(gem);
+
+            return NoContent();
+        }
         
         
 
