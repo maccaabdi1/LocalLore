@@ -1,3 +1,14 @@
-export default function Landing() {
-  return <h1>Home Page</h1>
+
+
+
+
+import LoginCard from './LoginCard';
+
+export default function Page() {
+  const handleLogin = (creds) => {
+    console.log('login', creds);
+    // call your API
+  };
+
+  return <LoginCard onSubmit={handleLogin} />;
 }
